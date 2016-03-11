@@ -42,7 +42,8 @@ public class Main extends BasicGame {
 	}
 
 	@Override
-	public void render(GameContainer gameContainer, Graphics graphics) throws SlickException {
-		graphics.drawString("Hello, world", 100, 100);
+	public void render(GameContainer c, Graphics g) throws SlickException {
+		g.drawString("Hello, world", 100, 100);
+		irc.render(c, this, g);
 	}
 }
