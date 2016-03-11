@@ -18,11 +18,12 @@ public class IRCReader extends PircBot implements Entity {
 	private static final int IRC_PORT = 6667;
 
 	/* Entity related */
-	private static final int MAX_MESSAGES = 40;
+	private static final int MAX_MESSAGES = 30, MESSAGE_TOTAL_MAX_LENGTH = 35;
 	private static final float CHAT_OFFSET_X = 600;
-	private static final float CHAT_OFFSET_Y = 670;
+	private static final float CHAT_OFFSET_Y = 650;
 	private static final float STRING_HEIGHT = 14;
 
+	private StringBuilder sb = new StringBuilder();
 	private LinkedList<String> chatMessages = new LinkedList<>();
 
 	private Map<Predicate<String>, List<Consumer<String>>> listeners = new HashMap<>();
@@ -42,7 +43,7 @@ public class IRCReader extends PircBot implements Entity {
 		joinChannel(channel);
 	}
 
-	public void registerListener(Predicate<String> pred, Consumer<String> listener){
+	public void registerListener(Predicate<String> pred, Consumer<String> listener) {
 		listeners.computeIfAbsent(pred, p -> new ArrayList<>());
 		listeners.get(pred).add(listener);
 	}
@@ -54,15 +55,24 @@ public class IRCReader extends PircBot implements Entity {
 	protected void onMessage(String channel, String sender, String login, String hostname, String message) {
 		// System.out.println(sender + ": " + message);
 
-		listeners.keySet().stream()
-				.filter(p -> p.test(message))
-				.flatMap(p -> listeners.get(p).stream())
+		listeners.keySet().stream().filter(p -> p.test(message)).flatMap(p -> listeners.get(p).stream())
 				.forEach(listener -> listener.accept(message));
 
 		synchronized (chatMessages) {
-			chatMessages.addFirst(sender + ": " + message);
+			sb.append(sender);
+			sb.append(": ");
+			int remainingLength = MESSAGE_TOTAL_MAX_LENGTH - sb.toString().length();
+			remainingLength = remainingLength < 0 ? 0 : remainingLength;
+			
+			if (message.length() > remainingLength) {
+				sb.append(message.substring(0, remainingLength));
+			} else {
+				sb.append(message);
+			}
+			chatMessages.addFirst(sb.toString());
+			sb.setLength(0);
 			if (chatMessages.size() > MAX_MESSAGES) {
-					chatMessages.removeLast();
+				chatMessages.removeLast();
 			}
 		}
 	}

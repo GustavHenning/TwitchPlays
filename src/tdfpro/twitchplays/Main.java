@@ -7,6 +7,8 @@ import java.io.IOException;
 
 public class Main extends BasicGame {
 
+	public static final int WIDTH = 1024, HEIGHT = 720;
+	
     private IRCReader irc;
     private Config config;
     private Hangman hangman;
@@ -17,7 +19,7 @@ public class Main extends BasicGame {
 
 	public static void main(String[] args) throws SlickException {
 		AppGameContainer agc = new AppGameContainer(new Main());
-		agc.setDisplayMode(1024, 720, false);
+		agc.setDisplayMode(WIDTH, HEIGHT, false);
         agc.setAlwaysRender(true);
 		agc.start();
 	}
