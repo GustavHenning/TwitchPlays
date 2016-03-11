@@ -79,7 +79,7 @@ public class Hangman implements Entity {
 		} catch (IOException e) {
 			System.err.println("Could not find word list");
 			e.printStackTrace();
-			return "";
+			return null;
 		}
 		
 	}
