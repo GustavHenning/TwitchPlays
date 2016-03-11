@@ -20,7 +20,7 @@ public class IRCReader extends PircBot implements Entity {
 	private static final float CHAT_OFFSET_X = 600;
 	private static final float CHAT_OFFSET_Y = 670;
 	private static final float STRING_HEIGHT = 14;
-	
+
 	private LinkedList<String> chatMessages = new LinkedList<String>();
 
 	/**
@@ -47,19 +47,28 @@ public class IRCReader extends PircBot implements Entity {
 	 * Incoming messages go through here
 	 */
 	@Override
-	protected void onMessage(String channel, String sender, String login, String hostname, String message) {
-		 System.out.println(sender + ": " + message);
+	protected synchronized void onMessage(String channel, String sender, String login, String hostname,
+			String message) {
+//		System.out.println(sender + ": " + message);
 		chatMessages.addFirst(sender + ": " + message);
-		if (chatMessages.size() > MAX_MESSAGES)
-			chatMessages.removeLast();
+		if (chatMessages.size() > MAX_MESSAGES) {
+			synchronized(chatMessages){
+				chatMessages.removeLast();				
+			}
+		}
 	}
 
 	@Override
-	public void render(GameContainer c, Game game, Graphics g) {
-		for(int i = 0; i < chatMessages.size(); i++){
-			g.drawString(chatMessages.get(i), CHAT_OFFSET_X, CHAT_OFFSET_Y - i*STRING_HEIGHT);
+	public synchronized void render(GameContainer c, Game game, Graphics g) {
+		for (int i = 0; i < chatMessages.size(); i++) {
+			String msg = null;
+			synchronized(chatMessages){
+				msg = chatMessages.get(i);			
+			}
+			if (msg != null)
+				g.drawString(msg, CHAT_OFFSET_X, CHAT_OFFSET_Y - i * STRING_HEIGHT);
 		}
-		
+
 	}
 
 	@Override
