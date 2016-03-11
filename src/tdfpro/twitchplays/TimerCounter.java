@@ -8,10 +8,14 @@ public class TimerCounter {
     }
 
     public boolean update(int delta) {
-        return (millis =- delta) < 0;
+        return (millis -= delta) < 0;
     }
 
     public void reset(int millis) {
         this.millis = millis;
+    }
+
+    public int getMillis() {
+        return millis;
     }
 }
