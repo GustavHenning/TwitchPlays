@@ -75,7 +75,7 @@ public class Hangman implements Entity {
 			raf.readLine();
 			String nextWord = raf.readLine();
 			raf.close();
-			return nextWord;
+			return nextWord.toUpperCase();
 		} catch (IOException e) {
 			System.err.println("Could not find word list");
 			e.printStackTrace();
