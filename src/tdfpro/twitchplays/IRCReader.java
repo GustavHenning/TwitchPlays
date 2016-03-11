@@ -18,8 +18,8 @@ public class IRCReader extends PircBot implements Entity {
 	private static final int IRC_PORT = 6667;
 
 	/* Entity related */
-	private static final int MAX_MESSAGES = 30, MESSAGE_TOTAL_MAX_LENGTH = 35;
-	private static final float CHAT_OFFSET_X = 600;
+	private static final int MAX_MESSAGES = 10, MESSAGE_TOTAL_MAX_LENGTH = 35;
+	private static final float CHAT_OFFSET_X = 650;
 	private static final float CHAT_OFFSET_Y = 650;
 	private static final float STRING_HEIGHT = 15f;
 

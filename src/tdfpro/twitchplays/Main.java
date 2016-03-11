@@ -36,7 +36,7 @@ public class Main extends BasicGame {
 
 
 
-        hangman = new Hangman("giraff hest", irc);
+        hangman = new Hangman(null, irc);
 	}
 
 	@Override
