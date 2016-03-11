@@ -6,25 +6,21 @@ import org.newdawn.slick.Graphics;
 import org.newdawn.slick.TrueTypeFont;
 
 import java.awt.*;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Hangman implements Entity {
-
-    private enum State {
-        FINISHED, PLAYING;
-    }
-
     private static final TrueTypeFont bigfont = new TrueTypeFont(
             new Font("Consolas", Font.PLAIN, 48), true);
 
-//    private final IRCReader irc;
-    private State gamestate = State.PLAYING;
+
+    private int kappaCount;
+
     private String secret;
     private Set<String> guesses = new HashSet<>();
-    private int kappaCount = 0;
+
+    private Map<String, Integer> currentRound = new HashMap<>();
+    private TimerCounter roundTimer = new TimerCounter(30000);
 
     public Hangman(String secret, IRCReader irc){
         this.secret = secret.toUpperCase();
@@ -33,8 +29,8 @@ public class Hangman implements Entity {
         guesses.add(" ");
     }
 
-    private void onLetter(String s) {
-        guesses.add(s);
+    private void onLetter(String msg) {
+        currentRound.compute(msg, (s, prev) -> (prev == null ? 0 : prev) + 1);
     }
 
     private void onKappa(String s) {
@@ -52,6 +48,15 @@ public class Hangman implements Entity {
 
     @Override
     public boolean update(GameContainer c, Game s, int delta) {
+        if(roundTimer.update(delta)){
+            roundTimer.reset(30000);
+
+            currentRound.entrySet().stream()
+                    .filter(e -> !guesses.contains(e.getKey()))
+                    .max((e1, e2) -> Integer.compare(e1.getValue(), e2.getValue()))
+                    .map(Map.Entry::getKey).ifPresent(guess -> guesses.add(guess));
+
+        }
         return false;
     }
 }
