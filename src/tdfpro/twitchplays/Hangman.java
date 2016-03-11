@@ -6,6 +6,10 @@ import org.newdawn.slick.Image;
 
 import java.awt.*;
 import java.awt.Font;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,6 +27,7 @@ public class Hangman implements Entity {
 
 	private Map<String, Integer> currentRound = new HashMap<>();
 	private TimerCounter roundTimer = new TimerCounter(ROUND_TIME_MS);
+	private Random r = new Random();
 
 	private Image armLeft, armRight, body, head, legs, bg;
 	private static final float HANGMAN_X = 250f, HANGMAN_Y = 260f, ARMS_OFFSET_Y = 65f, HANGMAN_SCALE = 0.3f;
@@ -59,6 +64,24 @@ public class Hangman implements Entity {
 
 	private int numPenalties(String secret, Set<String> guesses){
 		return (int) guesses.stream().filter(s -> !secret.contains(s)).count();
+	}
+	
+	private String nextWord(){
+		File f = new File("res/wordsEn.txt");
+		long next = r.nextLong() % (f.length() - 20); /* last word not longer */
+		try {
+			RandomAccessFile raf = new RandomAccessFile(f, "r");
+			raf.seek(next);
+			raf.readLine();
+			String nextWord = raf.readLine();
+			raf.close();
+			return nextWord;
+		} catch (IOException e) {
+			System.err.println("Could not find word list");
+			e.printStackTrace();
+			return "";
+		}
+		
 	}
 	
 	@Override
