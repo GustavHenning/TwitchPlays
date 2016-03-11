@@ -35,12 +35,12 @@ public class Hangman implements Entity {
 	private GameState state = GameState.PLAYING;
 
 	private String secret;
-	private Set<String> guesses = new HashSet<>();
+	private final Set<String> guesses = new HashSet<>();
 
-	private Map<String, Integer> currentRound = new HashMap<>();
-	private Set<String> guessers = new HashSet<>();
-	private TimerCounter roundTimer = new TimerCounter(ROUND_TIME_MS);
-	private Random r = new Random();
+	private final Map<String, Integer> currentRound = new HashMap<>();
+	private final Set<String> guessers = new HashSet<>();
+	private final TimerCounter roundTimer = new TimerCounter(ROUND_TIME_MS);
+	private final Random random = new Random();
 
 //	private Image armLeft, armRight, body, head, legs, bg;
 	private List<Sprite> man;
@@ -105,7 +105,7 @@ public class Hangman implements Entity {
 	private String nextWord(){
 		File f = new File("res/wordsEn.txt");
 
-		long next = r.nextInt((int) (f.length() - 20)); /* last word not longer */
+		long next = random.nextInt((int) (f.length() - 20)); /* last word not longer */
 		try {
 			RandomAccessFile raf = new RandomAccessFile(f, "r");
 			raf.seek(next);
@@ -137,7 +137,7 @@ public class Hangman implements Entity {
                 .collect(Collectors.joining(" "));
         smallfont.drawString(120f, 100f, wrongGuesses);
 
-        drawRightAligned(bigfont, 920, 60,  "T-" + Integer.toString(roundTimer.getMillis()/ 1000));
+        drawRightAligned(bigfont, 920, 60,  "T-" + Integer.toString(roundTimer.getMillis() / 1000));
 		synchronized (currentRound) {
 			List<String> curGuesses = currentRound.entrySet().stream()
 					.filter(e -> !guesses.contains(e.getKey()))
