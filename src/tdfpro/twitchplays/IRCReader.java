@@ -26,7 +26,7 @@ public class IRCReader extends PircBot implements Entity {
 	private StringBuilder sb = new StringBuilder();
 	private LinkedList<String> chatMessages = new LinkedList<>();
 
-	private Map<Predicate<String>, List<Consumer<String>>> listeners = new HashMap<>();
+	private Map<Predicate<String>, List<Consumer<IRCMessage>>> listeners = new HashMap<>();
 
 	/**
 	 * Creates an IRCReader and connects to a channel based on the credentials
@@ -43,7 +43,7 @@ public class IRCReader extends PircBot implements Entity {
 		joinChannel(channel);
 	}
 
-	public void registerListener(Predicate<String> pred, Consumer<String> listener) {
+	public void registerListener(Predicate<String> pred, Consumer<IRCMessage> listener) {
 		listeners.computeIfAbsent(pred, p -> new ArrayList<>());
 		listeners.get(pred).add(listener);
 	}
@@ -56,7 +56,7 @@ public class IRCReader extends PircBot implements Entity {
 		// System.out.println(sender + ": " + message);
 
 		listeners.keySet().stream().filter(p -> p.test(message)).flatMap(p -> listeners.get(p).stream())
-				.forEach(listener -> listener.accept(message));
+				.forEach(listener -> listener.accept(new IRCMessage(sender, message)));
 
 		synchronized (chatMessages) {
 			sb.append(sender);

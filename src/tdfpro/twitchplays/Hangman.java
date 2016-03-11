@@ -27,7 +27,7 @@ public class Hangman implements Entity {
 	private static final Predicate<String> isalpha = Pattern.compile("[A-Za-z]").asPredicate();
 
 	private enum GameState {
-		PLAYING, WIN, LOSS;
+		PLAYING, WIN, LOSS
 	}
 
 	private int kappaCount;
@@ -35,11 +35,12 @@ public class Hangman implements Entity {
 	private GameState state = GameState.PLAYING;
 
 	private String secret;
-	private Set<String> guesses = new HashSet<>();
+	private final Set<String> guesses = new HashSet<>();
 
-	private Map<String, Integer> currentRound = new HashMap<>();
-	private TimerCounter roundTimer = new TimerCounter(ROUND_TIME_MS);
-	private Random r = new Random();
+	private final Map<String, Integer> currentRound = new HashMap<>();
+	private final Set<String> guessers = new HashSet<>();
+	private final TimerCounter roundTimer = new TimerCounter(ROUND_TIME_MS);
+	private final Random random = new Random();
 
 //	private Image armLeft, armRight, body, head, legs, bg;
 	private List<Sprite> man;
@@ -78,11 +79,19 @@ public class Hangman implements Entity {
 		}
 	}
 
-	private void onLetter(String msg) {
-		currentRound.compute(msg.toUpperCase(), (s, prev) -> (prev == null ? 0 : prev) + 1);
+	private void onLetter(IRCMessage msg) {
+		if(!guessers.contains(msg.getSender())){
+			guessers.add(msg.getSender());
+			currentRound.compute(msg.getMessage().toUpperCase(), (s, prev) -> (prev == null ? 0 : prev) + 1);
+		}
 	}
 
-	private void onKappa(String s) {
+	private void resetRound(){
+		guessers.clear();
+		currentRound.clear();
+	}
+
+	private void onKappa(IRCMessage s) {
 		kappaCount++;
 	}
 
@@ -96,7 +105,7 @@ public class Hangman implements Entity {
 	private String nextWord(){
 		File f = new File("res/wordsEn.txt");
 
-		long next = r.nextInt((int) (f.length() - 20)); /* last word not longer */
+		long next = random.nextInt((int) (f.length() - 20)); /* last word not longer */
 		try {
 			RandomAccessFile raf = new RandomAccessFile(f, "r");
 			raf.seek(next);
@@ -128,17 +137,20 @@ public class Hangman implements Entity {
                 .collect(Collectors.joining(" "));
         smallfont.drawString(120f, 100f, wrongGuesses);
 
-        drawRightAligned(bigfont, 920, 60,  "T-" + Integer.toString(roundTimer.getMillis()/ 1000));
-        List<String> curGuesses = currentRound.entrySet().stream()
-                .filter(e -> !guesses.contains(e.getKey()))
-                .sorted(sortingcomparator)
-                .limit(5)
-                .map(e -> e.getKey() + ": " + e.getValue())
-                .collect(Collectors.toList());
+        drawRightAligned(bigfont, 920, 60,  "T-" + Integer.toString(roundTimer.getMillis() / 1000));
+		synchronized (currentRound) {
+			List<String> curGuesses = currentRound.entrySet().stream()
+					.filter(e -> !guesses.contains(e.getKey()))
+					.sorted(sortingcomparator)
+					.limit(5)
+					.map(e -> e.getKey() + ": " + e.getValue())
+					.collect(Collectors.toList());
+			for(int i = 0; i < curGuesses.size(); i++){
+				drawRightAligned(smallfont, 920, 105 + 25 * i, curGuesses.get(i));
+			}
+		}
 
-        for(int i = 0; i < curGuesses.size(); i++){
-            drawRightAligned(smallfont, 920, 105 + 25 * i, curGuesses.get(i));
-        }
+
 
 		/* Hung man MingLee */
 		man.stream().limit(numWrongGuesses()).forEach(spr -> spr.render(c, s, g));
@@ -173,7 +185,7 @@ public class Hangman implements Entity {
 					String guess = guessCandidates.get((int) (Math.random() * guessCandidates.size()));
 
 					guesses.add(guess);
-					currentRound.clear();
+					resetRound();
 
 					if (!guesses.isEmpty() && Arrays.stream(secret.split(""))
 							.allMatch(l -> guesses.contains(l))){
@@ -192,8 +204,8 @@ public class Hangman implements Entity {
 				guesses.clear();
 				guesses.add(" ");
 				currentRound.clear();
-				state = GameState.PLAYING;
 				secret = nextWord();
+				state = GameState.PLAYING;
 			}
 		}
 
