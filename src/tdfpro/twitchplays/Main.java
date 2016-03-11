@@ -1,5 +1,6 @@
 package tdfpro.twitchplays;
 
+import org.jibble.pircbot.IrcException;
 import org.newdawn.slick.*;
 
 import java.io.IOException;
@@ -8,6 +9,7 @@ public class Main extends BasicGame {
 
     private IRCReader irc;
     private Config config;
+    private Hangman hangman;
 
 	public Main() {
 		super("Twitch Plays Hangman - by the TDF Team");
@@ -24,25 +26,30 @@ public class Main extends BasicGame {
 	public void init(GameContainer gameContainer) throws SlickException {
         try {
             config = Config.loadConfig();
-        } catch (IOException e) {
+            irc = new IRCReader(config.username, config.oauthtoken, config.listenchannel);
+        } catch (IOException|IrcException e) {
             e.printStackTrace();
             gameContainer.exit();
         }
 
-        irc = new IRCReader(config.username, config.oauthtoken, config.listenchannel);
+
+
+        hangman = new Hangman("giraff hest", irc);
 	}
 
 	@Override
-	public void update(GameContainer gameContainer, int i) throws SlickException {
-        if (gameContainer.getInput().isKeyPressed(Input.KEY_ESCAPE)){
+	public void update(GameContainer gc, int delta) throws SlickException {
+        if (gc.getInput().isKeyPressed(Input.KEY_ESCAPE)){
             irc.disconnect();
             irc.dispose();
-            gameContainer.exit();
+            gc.exit();
         }
+        hangman.update(gc, this, delta);
 	}
 
 	@Override
-	public void render(GameContainer gameContainer, Graphics graphics) throws SlickException {
-		graphics.drawString("Hello, world", 100, 100);
-	}
+	public void render(GameContainer c, Graphics g) throws SlickException {
+        hangman.render(c, null, g);
+        irc.render(c, this, g);
+    }
 }

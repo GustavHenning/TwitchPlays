@@ -3,6 +3,7 @@ package tdfpro.twitchplays;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import org.newdawn.slick.Game;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.state.StateBasedGame;
@@ -29,15 +30,15 @@ public class EntityCollection<T extends Entity> implements Entity {
     }
 
     @Override
-    public void render(GameContainer c, StateBasedGame s, Graphics g) {
-        entities.forEach(e -> e.render(c, s, g));
+    public void render(GameContainer c, Game game, Graphics g) {
+        entities.forEach(e -> e.render(c, game, g));
     }
 
     @Override
-    public boolean update(GameContainer c, StateBasedGame s, int delta) {
+    public boolean update(GameContainer c, Game game, int delta) {
         Iterator<T> it = entities.iterator();
         while (it.hasNext()) {
-            if (it.next().update(c, s, delta)) {
+            if (it.next().update(c, game, delta)) {
                 it.remove();
             }
         }
