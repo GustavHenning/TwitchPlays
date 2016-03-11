@@ -1,3 +1,5 @@
+config.json
+
 
 # Created by https://www.gitignore.io/api/intellij,java,eclipse
 
@@ -34,6 +36,7 @@
 
 # IntelliJ
 /out/
+.idea/
 *.iml
 
 # mpeltonen/sbt-idea plugin

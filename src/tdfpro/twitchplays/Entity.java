@@ -13,7 +13,7 @@ public interface Entity {
      * @param g
      *            The graphics context.
      */
-    public void render(GameContainer c, StateBasedGame s, Graphics g);
+    void render(GameContainer c, StateBasedGame s, Graphics g);
 
     /**
      * Called every tick, before rendering.
@@ -24,5 +24,5 @@ public interface Entity {
      *            Number of milliseconds since last update
      * @return true if the entity should be removed from the next update
      */
-    public boolean update(GameContainer c, StateBasedGame s, int delta);
+    boolean update(GameContainer c, StateBasedGame s, int delta);
 }
