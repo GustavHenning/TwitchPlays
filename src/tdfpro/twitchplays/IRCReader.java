@@ -5,10 +5,12 @@ import org.jibble.pircbot.PircBot;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Game;
+import org.newdawn.slick.util.Log;
 
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public class IRCReader extends PircBot implements Entity {
 	/* irc related */
@@ -21,26 +23,28 @@ public class IRCReader extends PircBot implements Entity {
 	private static final float CHAT_OFFSET_Y = 670;
 	private static final float STRING_HEIGHT = 14;
 
-	private LinkedList<String> chatMessages = new LinkedList<String>();
+	private LinkedList<String> chatMessages = new LinkedList<>();
+
+	private Map<Predicate<String>, List<Consumer<String>>> listeners = new HashMap<>();
 
 	/**
 	 * Creates an IRCReader and connects to a channel based on the credentials
-	 * submitted in it's parameters
-	 * 
+	 * submitted in its parameters
+	 *
 	 * @param username
 	 * @param oauth
 	 * @param channel
 	 */
-	public IRCReader(String username, String oauth, String channel) {
-		try {
-			// setVerbose(true);
-			setName(username);
-			connect(IRC_HOSTNAME, IRC_PORT, oauth);
-			joinChannel(channel);
-		} catch (IOException | IrcException e) {
-			System.err.println("IRCReader: Could not connect to irc: " + IRC_HOSTNAME + ":" + IRC_PORT);
-			e.printStackTrace();
-		}
+	public IRCReader(String username, String oauth, String channel) throws IOException, IrcException {
+		// setVerbose(true);
+		setName(username);
+		connect(IRC_HOSTNAME, IRC_PORT, oauth);
+		joinChannel(channel);
+	}
+
+	public void registerListener(Predicate<String> pred, Consumer<String> listener){
+		listeners.computeIfAbsent(pred, p -> new ArrayList<>());
+		listeners.get(pred).add(listener);
 	}
 
 	/**
@@ -49,10 +53,16 @@ public class IRCReader extends PircBot implements Entity {
 	@Override
 	protected void onMessage(String channel, String sender, String login, String hostname, String message) {
 		// System.out.println(sender + ": " + message);
-		chatMessages.addFirst(sender + ": " + message);
-		if (chatMessages.size() > MAX_MESSAGES) {
-			synchronized (chatMessages) {
-				chatMessages.removeLast();
+
+		listeners.keySet().stream()
+				.filter(p -> p.test(message))
+				.flatMap(p -> listeners.get(p).stream())
+				.forEach(listener -> listener.accept(message));
+
+		synchronized (chatMessages) {
+			chatMessages.addFirst(sender + ": " + message);
+			if (chatMessages.size() > MAX_MESSAGES) {
+					chatMessages.removeLast();
 			}
 		}
 	}
@@ -71,5 +81,10 @@ public class IRCReader extends PircBot implements Entity {
 	@Override
 	public boolean update(GameContainer c, Game game, int delta) {
 		return false;
+	}
+
+	@Override
+	protected void onDisconnect() {
+		Log.info("Disconnected.");
 	}
 }
