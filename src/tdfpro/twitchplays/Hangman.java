@@ -57,6 +57,10 @@ public class Hangman implements Entity {
 		kappaCount++;
 	}
 
+	private int numPenalties(String secret, Set<String> guesses){
+		return (int) guesses.stream().filter(s -> !secret.contains(s)).count();
+	}
+	
 	@Override
 	public void render(GameContainer c, Game s, Graphics g) {
 		bg.draw(0, 0, Main.WIDTH, Main.HEIGHT);
