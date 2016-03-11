@@ -47,26 +47,23 @@ public class IRCReader extends PircBot implements Entity {
 	 * Incoming messages go through here
 	 */
 	@Override
-	protected synchronized void onMessage(String channel, String sender, String login, String hostname,
-			String message) {
-//		System.out.println(sender + ": " + message);
+	protected void onMessage(String channel, String sender, String login, String hostname, String message) {
+		// System.out.println(sender + ": " + message);
 		chatMessages.addFirst(sender + ": " + message);
 		if (chatMessages.size() > MAX_MESSAGES) {
-			synchronized(chatMessages){
-				chatMessages.removeLast();				
+			synchronized (chatMessages) {
+				chatMessages.removeLast();
 			}
 		}
 	}
 
 	@Override
-	public synchronized void render(GameContainer c, Game game, Graphics g) {
-		for (int i = 0; i < chatMessages.size(); i++) {
-			String msg = null;
-			synchronized(chatMessages){
-				msg = chatMessages.get(i);			
-			}
-			if (msg != null)
+	public void render(GameContainer c, Game game, Graphics g) {
+		synchronized (chatMessages) {
+			for (int i = 0; i < chatMessages.size(); i++) {
+				String msg = chatMessages.get(i);
 				g.drawString(msg, CHAT_OFFSET_X, CHAT_OFFSET_Y - i * STRING_HEIGHT);
+			}
 		}
 
 	}
