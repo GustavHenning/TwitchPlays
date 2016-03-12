@@ -147,8 +147,8 @@ public class Hangman implements Entity {
 
         bigfont.drawString(120f, 140f, status);
 
-        bigfont.drawString(120f, 60f, ":" + Integer.toString(kappaCount));
-        bigfont.drawString(300f, 60f, ":" + Integer.toString(livesLeft()));
+        bigfont.drawString(135f, 60f, Integer.toString(kappaCount));
+        bigfont.drawString(315f, 60f, Integer.toString(livesLeft()));
 
         String wrongGuesses = guesses.stream()
                 .filter(gu -> !secret.contains(gu)).sorted()
@@ -176,10 +176,10 @@ public class Hangman implements Entity {
         g.drawString(Integer.toString(KAPPA_GRANT_LIFE) + " Kappas in one game grants +1 life", 100, 650);
 
         if (state == GameState.WIN) {
-            bigfont.drawString(500, 100, "WIN!");
+            bigfont.drawString(700f, 300f, "WIN!");
         } else if (state == GameState.LOSS) {
-            bigfont.drawString(500, 100, "LOSS!");
-            bigfont.drawString(250, 200, "Word was " + secret);
+            bigfont.drawString(700f, 300f, "LOSS!");
+            smallfont.drawString(600f, 350f, "Word was " + secret);
         }
     }
 
