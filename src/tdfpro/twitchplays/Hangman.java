@@ -43,6 +43,7 @@ public class Hangman implements Entity {
 	private final Random random = new Random();
 
 //	private Image armLeft, armRight, body, head, legs, bg;
+	private List<Sprite> statusImages;
 	private List<Sprite> man;
 	private Image bg;
 	private static final float HANGMAN_X = 250f, HANGMAN_Y = 260f, ARMS_OFFSET_Y = 150f, HANGMAN_SCALE = 0.3f;
@@ -59,6 +60,9 @@ public class Hangman implements Entity {
 
 	private void initImages() {
 		try {
+			Image kappa = new Image("res/kappa.png");
+			Image lives = new Image("res/lives.png");
+			
 			Image armLeft = new Image("res/armSprite.png");
 			Image armRight = armLeft.getFlippedCopy(true, false);
 			Image body = new Image("res/chestSprite.png");
@@ -71,7 +75,9 @@ public class Hangman implements Entity {
 			Image supportPlank = basePlank.copy();
 			supportPlank.rotate(-45);
 			
-			
+			statusImages = new ArrayList<>();
+			statusImages.add(new Sprite(kappa, 80f, 55f, 0.11f));
+			statusImages.add(new Sprite(lives, 250f, 55f, 1f));
 			man = new ArrayList<>();
 			man.add(new Sprite(basePlank, HANGMAN_X + 260f, HANGMAN_Y - 40f, HANGMAN_SCALE + 0.1f));
 			man.add(new Sprite(hangPlank, HANGMAN_X - 200f, HANGMAN_Y - 410f, HANGMAN_SCALE));
@@ -101,6 +107,7 @@ public class Hangman implements Entity {
 	private void resetRound(){
 		guessers.clear();
 		currentRound.clear();
+		kappaCount = 0;
 	}
 
 	private void onKappa(IRCMessage s) {
@@ -142,7 +149,8 @@ public class Hangman implements Entity {
 
 		bigfont.drawString(120f, 140f, status);
 
-		bigfont.drawString(100f, 60f, Integer.toString(kappaCount));
+		bigfont.drawString(120f, 60f, ":" + Integer.toString(kappaCount));
+		bigfont.drawString(300f, 60f, ":" + Integer.toString(man.size() - numWrongGuesses()));
 
         String wrongGuesses = guesses.stream()
                 .filter(gu -> !secret.contains(gu)).sorted()
@@ -163,7 +171,7 @@ public class Hangman implements Entity {
 		}
 
 
-
+		statusImages.stream().forEach(spr -> spr.render(c, s, g));
 		/* Hung man MingLee */
 		man.stream().limit(numWrongGuesses()).forEach(spr -> spr.render(c, s, g));
 
