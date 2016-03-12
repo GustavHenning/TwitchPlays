@@ -32,6 +32,8 @@ public class Hangman implements Entity {
 	}
 
 	private int kappaCount;
+	private boolean kappaLife = false;
+	private final static int KAPPA_GRANT_LIFE = 300;
 
 	private GameState state = GameState.PLAYING;
 
@@ -108,13 +110,16 @@ public class Hangman implements Entity {
 	private void resetRound(){
 		guessers.clear();
 		currentRound.clear();
-		kappaCount = 0;
 	}
 
 	private void onKappa(IRCMessage s) {
 		kappaCount++;
 	}
 
+	private int livesLeft(){
+		return man.size() - numWrongGuesses() + (kappaLife ? 1 : 0);
+	}
+	
 	private int numWrongGuesses(){
 		return (int) guesses.stream()
 				.filter(isalpha)
@@ -151,12 +156,12 @@ public class Hangman implements Entity {
 		bigfont.drawString(120f, 140f, status);
 
 		bigfont.drawString(120f, 60f, ":" + Integer.toString(kappaCount));
-		bigfont.drawString(300f, 60f, ":" + Integer.toString(man.size() - numWrongGuesses()));
+		bigfont.drawString(300f, 60f, ":" + Integer.toString(livesLeft()));
 
         String wrongGuesses = guesses.stream()
                 .filter(gu -> !secret.contains(gu)).sorted()
                 .collect(Collectors.joining(" "));
-        smallfont.drawString(120f, 100f, wrongGuesses);
+        smallfont.drawString(370f, 70f, wrongGuesses);
 
         drawRightAligned(bigfont, 920, 60,  "T-" + Integer.toString(roundTimer.getMillis() / 1000));
 		synchronized (currentRound) {
@@ -176,7 +181,8 @@ public class Hangman implements Entity {
 		/* Hung man MingLee */
 		man.stream().limit(numWrongGuesses()).forEach(spr -> spr.render(c, s, g));
 
-		g.drawString("To play: type a single letter in the chat!", 100, 645);
+		g.drawString("To play: type a single letter in the chat!", 100, 630);
+		g.drawString(Integer.toString(KAPPA_GRANT_LIFE) + " Kappas in one game grants +1 life", 100, 650);
 
 		if (state == GameState.WIN){
 			bigfont.drawString(500, 100, "WIN!");
@@ -208,13 +214,16 @@ public class Hangman implements Entity {
 
 					guesses.add(guess);
 					resetRound();
+					if(!kappaLife && kappaCount >= KAPPA_GRANT_LIFE){
+						kappaLife = true;
+					}
 
 					if (!guesses.isEmpty() && Arrays.stream(secret.split(""))
 							.allMatch(guesses::contains)){
 						// win
 						state = GameState.WIN;
 						roundTimer.reset(2 * ROUND_TIME_MS);
-					} else if (numWrongGuesses() == man.size()){
+					} else if (livesLeft() == 0){
 						// loss
 						state = GameState.LOSS;
 						roundTimer.reset(2 * ROUND_TIME_MS);
@@ -223,6 +232,8 @@ public class Hangman implements Entity {
 			}
 		} else {
 			if (roundTimer.update(delta)) {
+				kappaCount = 0;
+				kappaLife = false;
 				guesses.clear();
 				guesses.add(" ");
 				currentRound.clear();
