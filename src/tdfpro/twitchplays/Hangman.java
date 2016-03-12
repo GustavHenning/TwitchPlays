@@ -71,6 +71,7 @@ public class Hangman implements Entity {
         Image legs = new Image("res/pantsSprite.png");
         Image rope = new Image("res/ropeSprite.png");
         Image basePlank = new Image("res/plankSprite.png");
+        Image hill = new Image("res/hillSprite.png");
         Image hangPlank = basePlank.copy();
         hangPlank.rotate(90);
         Image supportPlank = basePlank.copy();
@@ -80,6 +81,7 @@ public class Hangman implements Entity {
         statusImages.add(new Sprite(kappa, 80f, 55f, 0.11f));
         statusImages.add(new Sprite(lives, 250f, 55f, 1f));
         man = new ArrayList<>();
+        man.add(new Sprite(hill, HANGMAN_X + 180f, HANGMAN_Y + 258f, HANGMAN_SCALE + 0.15f));
         man.add(new Sprite(basePlank, HANGMAN_X + 260f, HANGMAN_Y - 40f, HANGMAN_SCALE + 0.1f));
         man.add(new Sprite(hangPlank, HANGMAN_X - 200f, HANGMAN_Y - 410f, HANGMAN_SCALE));
         man.add(new Sprite(supportPlank, HANGMAN_X + 430f, HANGMAN_Y - 185f, HANGMAN_SCALE - 0.1f));
