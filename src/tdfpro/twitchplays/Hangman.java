@@ -11,6 +11,7 @@ import java.io.RandomAccessFile;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -21,8 +22,8 @@ public class Hangman implements Entity {
 
     public static final int ROUND_TIME_MS = 15000;
 
-    private static final Comparator<Map.Entry<String, Integer>> sortingcomparator = (e1, e2) -> {
-        int diff = -Integer.compare(e1.getValue(), e2.getValue());
+    private static final Comparator<Map.Entry<String, LongAdder>> sortingcomparator = (e1, e2) -> {
+        int diff = -Integer.compare(e1.getValue().intValue(), e2.getValue().intValue());
         return diff == 0 ? e1.getKey().compareTo(e2.getKey()) : diff;
     };
     private static final Predicate<String> isalpha = Pattern.compile("^[A-Za-z]$").asPredicate();
@@ -40,7 +41,7 @@ public class Hangman implements Entity {
     private String secret;
     private final Set<String> guesses = ConcurrentHashMap.newKeySet();
 
-    private final Map<String, Integer> currentRound = new ConcurrentHashMap<>();
+    private final Map<String, LongAdder> currentRound = new ConcurrentHashMap<>();
     private final Set<String> guessers = ConcurrentHashMap.newKeySet();
     private final TimerCounter roundTimer = new TimerCounter(ROUND_TIME_MS);
     private final Random random = new Random();
@@ -96,7 +97,7 @@ public class Hangman implements Entity {
     private void onLetter(IRCMessage msg) {
         if (!guessers.contains(msg.getSender())) {
             guessers.add(msg.getSender());
-            currentRound.compute(msg.getMessage().toUpperCase(), (s, prev) -> (prev == null ? 0 : prev) + 1);
+            currentRound.computeIfAbsent(msg.getMessage().toUpperCase(), s -> new LongAdder()).increment();
         }
     }
 
@@ -189,15 +190,15 @@ public class Hangman implements Entity {
             if (roundTimer.update(delta)) {
                 roundTimer.reset(ROUND_TIME_MS);
 
-                List<Map.Entry<String, Integer>> allGuesses = currentRound.entrySet().stream()
+                List<Map.Entry<String, LongAdder>> allGuesses = currentRound.entrySet().stream()
                         .filter(e -> !guesses.contains(e.getKey()))
                         .sorted(sortingcomparator)
                         .collect(Collectors.toList());
                 if (!allGuesses.isEmpty()) {
-                    int max = allGuesses.get(0).getValue();
+                    int max = allGuesses.get(0).getValue().intValue();
 
                     List<String> guessCandidates = allGuesses.stream()
-                            .filter(str -> str.getValue() == max)
+                            .filter(str -> str.getValue().intValue() == max)
                             .map(Map.Entry::getKey)
                             .collect(Collectors.toList());
                     String guess = guessCandidates.get((int) (Math.random() * guessCandidates.size()));
