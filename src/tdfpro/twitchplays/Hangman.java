@@ -64,6 +64,12 @@ public class Hangman implements Entity {
 			Image body = new Image("res/chestSprite.png");
 			Image head = new Image("res/faceSprite.png");
 			Image legs = new Image("res/pantsSprite.png");
+			Image rope = new Image("res/ropeSprite.png");
+			Image basePlank = new Image("res/plankSprite.png");
+			Image hangPlank = basePlank.copy();
+			hangPlank.rotate(90);
+			Image supportPlank = basePlank.copy();
+			supportPlank.rotate(45);
 
 			man = new ArrayList<>();
 			man.add(new Sprite(head, HANGMAN_X + 5f, HANGMAN_Y - 50f, HANGMAN_SCALE-0.05f));
