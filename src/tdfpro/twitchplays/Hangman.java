@@ -45,7 +45,7 @@ public class Hangman implements Entity {
 //	private Image armLeft, armRight, body, head, legs, bg;
 	private List<Sprite> man;
 	private Image bg;
-	private static final float HANGMAN_X = 250f, HANGMAN_Y = 260f, ARMS_OFFSET_Y = 65f, HANGMAN_SCALE = 0.3f;
+	private static final float HANGMAN_X = 250f, HANGMAN_Y = 260f, ARMS_OFFSET_Y = 150f, HANGMAN_SCALE = 0.3f;
 
 
 
@@ -69,14 +69,20 @@ public class Hangman implements Entity {
 			Image hangPlank = basePlank.copy();
 			hangPlank.rotate(90);
 			Image supportPlank = basePlank.copy();
-			supportPlank.rotate(45);
-
+			supportPlank.rotate(-45);
+			
+			
 			man = new ArrayList<>();
-			man.add(new Sprite(head, HANGMAN_X + 5f, HANGMAN_Y - 50f, HANGMAN_SCALE-0.05f));
-			man.add(new Sprite(body, HANGMAN_X, HANGMAN_Y + 50f, HANGMAN_SCALE-0.15f));
-			man.add(new Sprite(armLeft, HANGMAN_X - 50f, HANGMAN_Y + ARMS_OFFSET_Y, HANGMAN_SCALE));
-			man.add(new Sprite(armRight, HANGMAN_X + 125f, HANGMAN_Y + ARMS_OFFSET_Y, HANGMAN_SCALE));
-			man.add(new Sprite(legs, HANGMAN_X - 4f, HANGMAN_Y + 200f, HANGMAN_SCALE));
+			man.add(new Sprite(basePlank, HANGMAN_X + 260f, HANGMAN_Y - 40f, HANGMAN_SCALE + 0.1f));
+			man.add(new Sprite(hangPlank, HANGMAN_X - 200f, HANGMAN_Y - 410f, HANGMAN_SCALE));
+			man.add(new Sprite(supportPlank, HANGMAN_X + 430f, HANGMAN_Y - 185f, HANGMAN_SCALE - 0.1f));
+			man.add(new Sprite(rope, HANGMAN_X + 35f, HANGMAN_Y - 50f, HANGMAN_SCALE - 0.07f));
+			
+			man.add(new Sprite(head, HANGMAN_X + 11f, HANGMAN_Y + 70f, HANGMAN_SCALE - 0.13f));
+			man.add(new Sprite(body, HANGMAN_X + 5f, HANGMAN_Y + 140f, HANGMAN_SCALE - 0.19f));
+			man.add(new Sprite(armLeft, HANGMAN_X - 30f, HANGMAN_Y + ARMS_OFFSET_Y, HANGMAN_SCALE - 0.08f));
+			man.add(new Sprite(armRight, HANGMAN_X + 95f, HANGMAN_Y + ARMS_OFFSET_Y, HANGMAN_SCALE - 0.08f));
+			man.add(new Sprite(legs, HANGMAN_X - 4f, HANGMAN_Y + 250f, HANGMAN_SCALE - 0.05f));
 
 			bg = new Image("res/BBoardSprite.png");
 		} catch (SlickException e) {
@@ -160,6 +166,7 @@ public class Hangman implements Entity {
 
 		/* Hung man MingLee */
 		man.stream().limit(numWrongGuesses()).forEach(spr -> spr.render(c, s, g));
+		man.forEach(spr -> spr.render(c, s, g));
 
 		g.drawString("To play: type a single letter in the chat!", 100, 645);
 
