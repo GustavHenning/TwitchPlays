@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -24,7 +25,7 @@ public class Hangman implements Entity {
 		int diff = -Integer.compare(e1.getValue(), e2.getValue());
 		return diff == 0 ? e1.getKey().compareTo(e2.getKey()) : diff;
 	};
-	private static final Predicate<String> isalpha = Pattern.compile("[A-Za-z]").asPredicate();
+	private static final Predicate<String> isalpha = Pattern.compile("^[A-Za-z]$").asPredicate();
 
 	private enum GameState {
 		PLAYING, WIN, LOSS
@@ -37,7 +38,7 @@ public class Hangman implements Entity {
 	private String secret;
 	private final Set<String> guesses = new HashSet<>();
 
-	private final Map<String, Integer> currentRound = new HashMap<>();
+	private final Map<String, Integer> currentRound = new ConcurrentHashMap<>();
 	private final Set<String> guessers = new HashSet<>();
 	private final TimerCounter roundTimer = new TimerCounter(ROUND_TIME_MS);
 	private final Random random = new Random();
@@ -209,7 +210,7 @@ public class Hangman implements Entity {
 					resetRound();
 
 					if (!guesses.isEmpty() && Arrays.stream(secret.split(""))
-							.allMatch(l -> guesses.contains(l))){
+							.allMatch(guesses::contains)){
 						// win
 						state = GameState.WIN;
 						roundTimer.reset(2 * ROUND_TIME_MS);
