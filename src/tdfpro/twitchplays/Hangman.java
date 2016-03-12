@@ -166,7 +166,6 @@ public class Hangman implements Entity {
 
 		/* Hung man MingLee */
 		man.stream().limit(numWrongGuesses()).forEach(spr -> spr.render(c, s, g));
-		man.forEach(spr -> spr.render(c, s, g));
 
 		g.drawString("To play: type a single letter in the chat!", 100, 645);
 
