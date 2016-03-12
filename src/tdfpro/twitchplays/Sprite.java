@@ -21,7 +21,7 @@ public class Sprite implements Entity {
 
     @Override
     public void render(GameContainer c, Game game, Graphics g) {
-        image.draw(x,y, scale);
+        image.draw(x, y, scale);
     }
 
     @Override

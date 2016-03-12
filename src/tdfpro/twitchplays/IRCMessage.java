@@ -15,6 +15,5 @@ public class IRCMessage {
     public IRCMessage(String sender, String message) {
         this.sender = sender;
         this.message = message;
-
     }
 }

@@ -1,12 +1,11 @@
 package tdfpro.twitchplays;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-
 import org.newdawn.slick.Game;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
-import org.newdawn.slick.state.StateBasedGame;
+
+import java.util.ArrayList;
+import java.util.Iterator;
 
 public class EntityCollection<T extends Entity> implements Entity {
 
@@ -15,7 +14,7 @@ public class EntityCollection<T extends Entity> implements Entity {
     /**
      * Creates a new empty collection.
      */
-    public EntityCollection(){
+    public EntityCollection() {
         this(new ArrayList<T>());
     }
 
@@ -25,7 +24,7 @@ public class EntityCollection<T extends Entity> implements Entity {
      *
      * @param initial The initial entities in this collection.
      */
-    public EntityCollection(ArrayList<T> initial){
+    public EntityCollection(ArrayList<T> initial) {
         entities = initial;
     }
 
@@ -45,7 +44,7 @@ public class EntityCollection<T extends Entity> implements Entity {
         return false;
     }
 
-    public void add(T e){
+    public void add(T e) {
         entities.add(e);
     }
 }
