@@ -20,7 +20,7 @@ public class Hangman implements Entity {
     private static final TrueTypeFont bigfont = new TrueTypeFont(new Font("Consolas", Font.PLAIN, 48), true);
     private static final TrueTypeFont smallfont = new TrueTypeFont(new Font("Consolas", Font.PLAIN, 28), true);
 
-    public static final int ROUND_TIME_MS = 40000;
+    public static final int ROUND_TIME_MS = 25000;
 
     private static final Comparator<Map.Entry<String, LongAdder>> sortingcomparator = (e1, e2) -> {
         int diff = -Integer.compare(e1.getValue().intValue(), e2.getValue().intValue());
@@ -97,7 +97,7 @@ public class Hangman implements Entity {
     }
 
     private void onLetter(IRCMessage msg) {
-        if (!guessers.contains(msg.getSender())) {
+        if (!guessers.contains(msg.getSender()) && !guesses.contains(msg.getMessage().toUpperCase())) {
             guessers.add(msg.getSender());
             currentRound.computeIfAbsent(msg.getMessage().toUpperCase(), s -> new LongAdder()).increment();
         }
@@ -214,11 +214,11 @@ public class Hangman implements Entity {
                             .allMatch(guesses::contains)) {
                         // win
                         state = GameState.WIN;
-                        roundTimer.reset(2 * ROUND_TIME_MS);
+                        roundTimer.reset(ROUND_TIME_MS);
                     } else if (livesLeft() == 0) {
                         // loss
                         state = GameState.LOSS;
-                        roundTimer.reset(2 * ROUND_TIME_MS);
+                        roundTimer.reset(ROUND_TIME_MS);
                     }
                 }
             }
