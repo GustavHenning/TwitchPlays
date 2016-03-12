@@ -103,11 +103,6 @@ public class Hangman implements Entity {
         }
     }
 
-    private void resetRound() {
-        guessers.clear();
-        currentRound.clear();
-    }
-
     private void onKappa(IRCMessage s) {
         kappaCount++;
     }
@@ -196,6 +191,11 @@ public class Hangman implements Entity {
                         .filter(e -> !guesses.contains(e.getKey()))
                         .sorted(sortingcomparator)
                         .collect(Collectors.toList());
+
+
+                guessers.clear();
+                currentRound.clear();
+                
                 if (!allGuesses.isEmpty()) {
                     int max = allGuesses.get(0).getValue().intValue();
 
@@ -206,7 +206,6 @@ public class Hangman implements Entity {
                     String guess = guessCandidates.get(random.nextInt(guessCandidates.size()));
 
                     guesses.add(guess);
-                    resetRound();
                     if (!kappaLife && kappaCount >= KAPPA_GRANT_LIFE) {
                         kappaLife = true;
                     }
