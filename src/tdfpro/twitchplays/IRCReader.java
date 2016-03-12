@@ -23,8 +23,7 @@ public class IRCReader extends PircBot implements Entity {
 	private static final float CHAT_OFFSET_Y = 650;
 	private static final float STRING_HEIGHT = 15f;
 
-	private StringBuilder sb = new StringBuilder();
-	private LinkedList<String> chatMessages = new LinkedList<>();
+	private final LinkedList<String> chatMessages = new LinkedList<>();
 
 	private Map<Predicate<String>, List<Consumer<IRCMessage>>> listeners = new HashMap<>();
 
@@ -59,6 +58,7 @@ public class IRCReader extends PircBot implements Entity {
 				.forEach(listener -> listener.accept(new IRCMessage(sender, message)));
 
 		synchronized (chatMessages) {
+			StringBuilder sb = new StringBuilder();
 			sb.append(sender);
 			sb.append(": ");
 			int remainingLength = MESSAGE_TOTAL_MAX_LENGTH - sb.toString().length();
@@ -70,7 +70,6 @@ public class IRCReader extends PircBot implements Entity {
 				sb.append(message);
 			}
 			chatMessages.addFirst(sb.toString());
-			sb.setLength(0);
 			if (chatMessages.size() > MAX_MESSAGES) {
 				chatMessages.removeLast();
 			}

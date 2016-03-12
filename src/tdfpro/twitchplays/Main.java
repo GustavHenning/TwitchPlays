@@ -34,8 +34,6 @@ public class Main extends BasicGame {
             gameContainer.exit();
         }
 
-
-
         hangman = new Hangman(null, irc);
 	}
 

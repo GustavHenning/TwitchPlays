@@ -36,10 +36,10 @@ public class Hangman implements Entity {
 	private GameState state = GameState.PLAYING;
 
 	private String secret;
-	private final Set<String> guesses = new HashSet<>();
+	private final Set<String> guesses = ConcurrentHashMap.newKeySet();
 
 	private final Map<String, Integer> currentRound = new ConcurrentHashMap<>();
-	private final Set<String> guessers = new HashSet<>();
+	private final Set<String> guessers = ConcurrentHashMap.newKeySet();
 	private final TimerCounter roundTimer = new TimerCounter(ROUND_TIME_MS);
 	private final Random random = new Random();
 
@@ -49,9 +49,7 @@ public class Hangman implements Entity {
 	private Image bg;
 	private static final float HANGMAN_X = 250f, HANGMAN_Y = 260f, ARMS_OFFSET_Y = 150f, HANGMAN_SCALE = 0.3f;
 
-
-
-	public Hangman(String secret, IRCReader irc) {
+	public Hangman(String secret, IRCReader irc) throws SlickException {
 		initImages();
 		this.secret = secret == null ? nextWord() : secret.toUpperCase();
 		irc.registerListener(isalpha, this::onLetter);
@@ -59,43 +57,38 @@ public class Hangman implements Entity {
 		guesses.add(" ");
 	}
 
-	private void initImages() {
-		try {
-			Image kappa = new Image("res/kappa.png");
-			Image lives = new Image("res/lives.png");
+	private void initImages() throws SlickException {
+		Image kappa = new Image("res/kappa.png");
+		Image lives = new Image("res/lives.png");
+		
+		Image armLeft = new Image("res/armSprite.png");
+		Image armRight = armLeft.getFlippedCopy(true, false);
+		Image body = new Image("res/chestSprite.png");
+		Image head = new Image("res/faceSprite.png");
+		Image legs = new Image("res/pantsSprite.png");
+		Image rope = new Image("res/ropeSprite.png");
+		Image basePlank = new Image("res/plankSprite.png");
+		Image hangPlank = basePlank.copy();
+		hangPlank.rotate(90);
+		Image supportPlank = basePlank.copy();
+		supportPlank.rotate(-45);
+		
+		statusImages = new ArrayList<>();
+		statusImages.add(new Sprite(kappa, 80f, 55f, 0.11f));
+		statusImages.add(new Sprite(lives, 250f, 55f, 1f));
+		man = new ArrayList<>();
+		man.add(new Sprite(basePlank, HANGMAN_X + 260f, HANGMAN_Y - 40f, HANGMAN_SCALE + 0.1f));
+		man.add(new Sprite(hangPlank, HANGMAN_X - 200f, HANGMAN_Y - 410f, HANGMAN_SCALE));
+		man.add(new Sprite(supportPlank, HANGMAN_X + 430f, HANGMAN_Y - 185f, HANGMAN_SCALE - 0.1f));
+		man.add(new Sprite(rope, HANGMAN_X + 35f, HANGMAN_Y - 50f, HANGMAN_SCALE - 0.07f));
+		
+		man.add(new Sprite(head, HANGMAN_X + 11f, HANGMAN_Y + 70f, HANGMAN_SCALE - 0.13f));
+		man.add(new Sprite(body, HANGMAN_X + 5f, HANGMAN_Y + 140f, HANGMAN_SCALE - 0.19f));
+		man.add(new Sprite(armLeft, HANGMAN_X - 30f, HANGMAN_Y + ARMS_OFFSET_Y, HANGMAN_SCALE - 0.08f));
+		man.add(new Sprite(armRight, HANGMAN_X + 95f, HANGMAN_Y + ARMS_OFFSET_Y, HANGMAN_SCALE - 0.08f));
+		man.add(new Sprite(legs, HANGMAN_X - 4f, HANGMAN_Y + 250f, HANGMAN_SCALE - 0.05f));
 			
-			Image armLeft = new Image("res/armSprite.png");
-			Image armRight = armLeft.getFlippedCopy(true, false);
-			Image body = new Image("res/chestSprite.png");
-			Image head = new Image("res/faceSprite.png");
-			Image legs = new Image("res/pantsSprite.png");
-			Image rope = new Image("res/ropeSprite.png");
-			Image basePlank = new Image("res/plankSprite.png");
-			Image hangPlank = basePlank.copy();
-			hangPlank.rotate(90);
-			Image supportPlank = basePlank.copy();
-			supportPlank.rotate(-45);
-			
-			statusImages = new ArrayList<>();
-			statusImages.add(new Sprite(kappa, 80f, 55f, 0.11f));
-			statusImages.add(new Sprite(lives, 250f, 55f, 1f));
-			man = new ArrayList<>();
-			man.add(new Sprite(basePlank, HANGMAN_X + 260f, HANGMAN_Y - 40f, HANGMAN_SCALE + 0.1f));
-			man.add(new Sprite(hangPlank, HANGMAN_X - 200f, HANGMAN_Y - 410f, HANGMAN_SCALE));
-			man.add(new Sprite(supportPlank, HANGMAN_X + 430f, HANGMAN_Y - 185f, HANGMAN_SCALE - 0.1f));
-			man.add(new Sprite(rope, HANGMAN_X + 35f, HANGMAN_Y - 50f, HANGMAN_SCALE - 0.07f));
-			
-			man.add(new Sprite(head, HANGMAN_X + 11f, HANGMAN_Y + 70f, HANGMAN_SCALE - 0.13f));
-			man.add(new Sprite(body, HANGMAN_X + 5f, HANGMAN_Y + 140f, HANGMAN_SCALE - 0.19f));
-			man.add(new Sprite(armLeft, HANGMAN_X - 30f, HANGMAN_Y + ARMS_OFFSET_Y, HANGMAN_SCALE - 0.08f));
-			man.add(new Sprite(armRight, HANGMAN_X + 95f, HANGMAN_Y + ARMS_OFFSET_Y, HANGMAN_SCALE - 0.08f));
-			man.add(new Sprite(legs, HANGMAN_X - 4f, HANGMAN_Y + 250f, HANGMAN_SCALE - 0.05f));
-
-			bg = new Image("res/BBoardSprite.png");
-		} catch (SlickException e) {
-			System.err.println("Unable to load image elements");
-			e.printStackTrace();
-		}
+		bg = new Image("res/BBoardSprite.png");
 	}
 
 	private void onLetter(IRCMessage msg) {
@@ -159,16 +152,15 @@ public class Hangman implements Entity {
         smallfont.drawString(120f, 100f, wrongGuesses);
 
         drawRightAligned(bigfont, 920, 60,  "T-" + Integer.toString(roundTimer.getMillis() / 1000));
-		synchronized (currentRound) {
-			List<String> curGuesses = currentRound.entrySet().stream()
-					.filter(e -> !guesses.contains(e.getKey()))
-					.sorted(sortingcomparator)
-					.limit(5)
-					.map(e -> e.getKey() + ": " + e.getValue())
-					.collect(Collectors.toList());
-			for(int i = 0; i < curGuesses.size(); i++){
-				drawRightAligned(smallfont, 920, 105 + 25 * i, curGuesses.get(i));
-			}
+
+		List<String> curGuesses = currentRound.entrySet().stream()
+				.filter(e -> !guesses.contains(e.getKey()))
+				.sorted(sortingcomparator)
+				.limit(5)
+				.map(e -> e.getKey() + ": " + e.getValue())
+				.collect(Collectors.toList());
+		for(int i = 0; i < curGuesses.size(); i++){
+			drawRightAligned(smallfont, 920, 105 + 25 * i, curGuesses.get(i));
 		}
 
 
