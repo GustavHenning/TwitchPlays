@@ -20,7 +20,7 @@ public class Hangman implements Entity {
     private static final TrueTypeFont bigfont = new TrueTypeFont(new Font("Consolas", Font.PLAIN, 48), true);
     private static final TrueTypeFont smallfont = new TrueTypeFont(new Font("Consolas", Font.PLAIN, 28), true);
 
-    public static final int ROUND_TIME_MS = 25000;
+    public static final int ROUND_TIME_MS = 30000;
 
     private static final Comparator<Map.Entry<String, LongAdder>> sortingcomparator = (e1, e2) -> {
         int diff = -Integer.compare(e1.getValue().intValue(), e2.getValue().intValue());
