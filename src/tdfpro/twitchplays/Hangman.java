@@ -173,6 +173,7 @@ public class Hangman implements Entity {
 			bigfont.drawString(500, 100, "WIN!");
 		} else if (state == GameState.LOSS) {
 			bigfont.drawString(500, 100, "LOSS!");
+			bigfont.drawString(250, 200, "Word was " + secret);
 		}
 
 	}
