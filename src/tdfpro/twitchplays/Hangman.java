@@ -20,7 +20,7 @@ public class Hangman implements Entity {
     private static final TrueTypeFont bigfont = new TrueTypeFont(new Font("Consolas", Font.PLAIN, 48), true);
     private static final TrueTypeFont smallfont = new TrueTypeFont(new Font("Consolas", Font.PLAIN, 28), true);
 
-    public static final int ROUND_TIME_MS = 15000;
+    public static final int ROUND_TIME_MS = 40000;
 
     private static final Comparator<Map.Entry<String, LongAdder>> sortingcomparator = (e1, e2) -> {
         int diff = -Integer.compare(e1.getValue().intValue(), e2.getValue().intValue());
@@ -201,7 +201,7 @@ public class Hangman implements Entity {
                             .filter(str -> str.getValue().intValue() == max)
                             .map(Map.Entry::getKey)
                             .collect(Collectors.toList());
-                    String guess = guessCandidates.get((int) (Math.random() * guessCandidates.size()));
+                    String guess = guessCandidates.get(random.nextInt(guessCandidates.size()));
 
                     guesses.add(guess);
                     resetRound();
