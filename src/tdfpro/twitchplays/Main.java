@@ -6,7 +6,7 @@ import org.newdawn.slick.*;
 import java.io.IOException;
 
 public class Main extends BasicGame {
-
+	
     public static final int WIDTH = 1024, HEIGHT = 720;
 
     private IRCReader irc;
